@@ -1,0 +1,29 @@
+# prometheus/prometheus.yml
+global:
+  scrape_interval: 15s       # How often to scrape targets
+  evaluation_interval: 15s   # How often to evaluate alert rules
+
+# Load alert rules
+rule_files:
+  - "alert_rules.yml"
+
+# Alertmanager connection
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configs
+scrape_configs:
+  # Scrape the ML inference API on EC2
+  - job_name: "mlops_inference"
+    static_configs:
+      - targets: ["YOUR_EC2_IP:8000"]
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+
+  # Also scrape Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]

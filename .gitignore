@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pkl
+*.env
+.env
+*.zip
+grafana_data/
+.vscode/
+pyrefly.toml

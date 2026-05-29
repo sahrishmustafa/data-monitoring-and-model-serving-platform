@@ -1,0 +1,74 @@
+# prometheus/alert_rules.yml
+groups:
+  - name: mlops_alerts
+    rules:
+
+      # 1 — Data source returned 503
+      - alert: DataLakeUnavailable
+        expr: increase(datalake_unavailable_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Data lake unavailable"
+          description: "Data source returned 503. Check API availability."
+
+      # 2 — New feature added to schema
+      - alert: FeatureAdded
+        expr: increase(feature_added_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Schema change: feature added"
+          description: "New feature detected in schema. Retraining may be required."
+
+      # 3 — Feature removed from schema
+      - alert: FeatureRemoved
+        expr: increase(feature_removed_total[1m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Schema change: feature removed"
+          description: "Feature dropped from schema. Verify pipeline compatibility."
+
+      # 4 — Distribution drift detected (gauge == 1)
+      - alert: DistributionDrift
+        expr: distribution_drift_detected == 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Distribution drift detected"
+          description: "Data distribution drift detected. Model may be stale."
+
+      # 5 — Any positive drift value
+      - alert: FeatureDriftDetected
+        expr: distribution_drift_detected > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Feature-level drift flagged"
+          description: "Feature-level drift flagged. Investigate upstream data."
+
+      # 6 — P95 latency > 1 second
+      - alert: HighResponseLatency
+        expr: histogram_quantile(0.95, rate(response_delay_seconds_bucket[5m])) > 1.0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High inference latency"
+          description: "P95 response latency exceeded 1 second."
+
+      # 7 — Model accuracy below threshold
+      - alert: LowModelAccuracy
+        expr: model_accuracy < 0.8
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low model accuracy"
+          description: "Model accuracy dropped below threshold. Auto-retraining triggered."

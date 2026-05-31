@@ -22,25 +22,25 @@ def test_predict_returns_correct_schema():
     # Patch load_latest_model so the app uses our mock
     with patch("serving.app.load_latest_model", return_value=mock_model):
         from serving.app import app
-        client = TestClient(app)
-        response = client.post(
-            "/predict",
-            json={"features": [1.0, 2.0, 3.0, 4.0]}
-        )
+        with TestClient(app) as client:
+            response = client.post(
+                "/predict",
+                json={"features": [1.0, 2.0, 3.0, 4.0]}
+            )
 
-    assert response.status_code == 200
-    data = response.json()
-    assert "prediction" in data, "Response must contain 'prediction'"
-    assert "confidence" in data, "Response must contain 'confidence'"
-    assert isinstance(data["confidence"], float)
+            assert response.status_code == 200
+            data = response.json()
+            assert "prediction" in data, "Response must contain 'prediction'"
+            assert "confidence" in data, "Response must contain 'confidence'"
+            assert isinstance(data["confidence"], float)
 
 
 def test_health_endpoint():
     """Health endpoint should always return 200 with status ok."""
     with patch("serving.app.load_latest_model", return_value=MagicMock()):
         from serving.app import app
-        client = TestClient(app)
-        response = client.get("/health")
+        with TestClient(app) as client:
+            response = client.get("/health")
 
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+            assert response.status_code == 200
+            assert response.json() == {"status": "ok"}

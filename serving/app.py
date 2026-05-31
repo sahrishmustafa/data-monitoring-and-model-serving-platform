@@ -34,13 +34,13 @@ from exporter.metrics import model_accuracy, response_delay_seconds
 MODEL_DIR = Path(os.getenv("MODEL_PATH", "/app/model"))
 
 def load_latest_model():
-    """Load the model path recorded in model/latest.txt."""
-    latest_file = MODEL_DIR / "latest.txt"
+    latest_file = Path("/app/model/latest.txt")
     if latest_file.exists():
-        model_path = Path(latest_file.read_text().strip())
+        # Read the relative path and resolve it from /app
+        relative = latest_file.read_text().strip()
+        model_path = Path("/app") / relative
     else:
-        # Fallback: find highest-numbered pkl
-        pkls = sorted(MODEL_DIR.glob("model_v*.pkl"))
+        pkls = sorted(Path("/app/model").glob("model_v*.pkl"))
         if not pkls:
             raise FileNotFoundError("No model file found")
         model_path = pkls[-1]

@@ -112,7 +112,8 @@ def train() -> tuple[float, Path]:
 
     # Write a tiny metadata file so the server knows which model to load
     meta_path = MODEL_DIR / "latest.txt"
-    meta_path.write_text(str(model_path))
+    # Ensure the path stored is relative to the image's root (/app)
+    meta_path.write_text(f"model/model_v{version}.pkl")
 
     return best_acc, model_path
 

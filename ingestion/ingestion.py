@@ -145,7 +145,7 @@ def trigger_retrain(reason: str) -> None:
     log.info(f"Triggering retraining — reason: {reason}")
     import subprocess
     subprocess.Popen(
-        ["python", str(Path(__file__).parent.parent / "model" / "retrain_trigger.py"),
+        [sys.executable, str(Path(__file__).parent.parent / "model" / "retrain_trigger.py"),
          "--reason", reason]
     )
     new_rows_since_retrain = 0
@@ -157,8 +157,32 @@ def ingest_once() -> None:
     if batch is None:
         return
 
-    schema: list[str] = batch.get("schema", [])
-    records: list[dict] = batch.get("records", [])
+    schema: list[str] = []
+    records: list[dict] = []
+
+    if isinstance(batch, list):
+        if batch:
+            # Determine maximum number of features from items in batch
+            num_features = 0
+            for item in batch:
+                if isinstance(item, dict) and "features" in item and isinstance(item["features"], list):
+                    num_features = max(num_features, len(item["features"]))
+            
+            schema = [f"feat_{i}" for i in range(num_features)] + ["label"]
+            for item in batch:
+                if isinstance(item, dict):
+                    feat_vals = item.get("features", [])
+                    label_val = item.get("label")
+                    # Construct record mapping feat_0, feat_1, ... and label
+                    record_dict = {f"feat_{i}": (feat_vals[i] if i < len(feat_vals) else None) for i in range(num_features)}
+                    record_dict["label"] = label_val
+                    records.append(record_dict)
+    elif isinstance(batch, dict):
+        schema = batch.get("schema", [])
+        records = batch.get("records", [])
+    else:
+        log.warning(f"Unexpected batch format: {type(batch)}")
+        return
 
     if not schema or not records:
         log.warning("Empty batch received — skipping")

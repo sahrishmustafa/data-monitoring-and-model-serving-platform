@@ -4,8 +4,6 @@ version: "3.8"
 services:
   prometheus:
     image: prom/prometheus:latest
-    extra_hosts:
-      - "host.docker.internal:host-gateway" # for local communication, remove when ec2
     container_name: prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml

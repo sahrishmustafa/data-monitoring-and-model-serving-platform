@@ -15,7 +15,7 @@ An end-to-end production MLOps pipeline that ingests live data, trains and auto-
 - **CI/CD:** GitHub Actions — lint, test, build Docker image, deploy to EC2
 
 ## EC2 Public IP
-`YOUR_EC2_IP`
+100.54.209.53
 
 ## Setup — Local
 
@@ -56,9 +56,9 @@ docker compose up -d
 
 ### Test the deployed endpoints
 ```bash
-curl http://YOUR_EC2_IP:8000/health
-curl http://YOUR_EC2_IP:8000/metrics
-curl -X POST http://YOUR_EC2_IP:8000/predict \
+curl http://100.54.209.53:8000/health
+curl http://100.54.209.53:8000/metrics
+curl -X POST http://100.54.209.53:8000/predict \
      -H "Content-Type: application/json" \
      -d '{"features": [1.0, 2.0, 3.0]}'
 ```

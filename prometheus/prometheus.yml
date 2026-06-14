@@ -19,8 +19,8 @@ scrape_configs:
   # Scrape the ML inference API on EC2
   - job_name: "mlops_inference"
     static_configs:
-      # - targets: ["YOUR_EC2_IP:8000"] # when ec2 done
-      - targets: ["host.docker.internal:8000"]
+       - targets: ["100.54.209.53:8000"] # when ec2 done
+     # - targets: ["host.docker.internal:8000"]
     metrics_path: "/metrics"
     scrape_interval: 15s
 

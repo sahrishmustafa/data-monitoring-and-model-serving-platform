@@ -110,6 +110,9 @@ def train() -> tuple[float, Path]:
     joblib.dump(best_model, model_path)
     log.info(f"Model saved to {model_path} (accuracy={best_acc:.4f})")
 
+    acc_path = MODEL_DIR / "latest_accuracy.txt"
+    acc_path.write_text(str(best_acc))
+
     # Write a tiny metadata file so the server knows which model to load
     meta_path = MODEL_DIR / "latest.txt"
     # Ensure the path stored is relative to the image's root (/app)

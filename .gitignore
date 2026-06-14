@@ -8,3 +8,6 @@ __pycache__/
 grafana_data/
 .vscode/
 pyrefly.toml
+
+# Ignore versioned model files, only keep/track latest_model.pkl
+model/model_v*.pkl

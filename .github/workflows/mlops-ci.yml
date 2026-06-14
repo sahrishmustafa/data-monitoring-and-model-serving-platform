@@ -93,7 +93,7 @@ jobs:
               ${{ secrets.DOCKER_USERNAME }}/mlops-serving:latest
 
             # Health check
-            sleep 5
+            sleep 15
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
             if [ "$STATUS" != "200" ]; then
               echo "Health check failed with status $STATUS"

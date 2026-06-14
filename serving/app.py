@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 # ── Import shared metrics ──────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from exporter.metrics import model_accuracy, response_delay_seconds
+from exporter.metrics import model_accuracy, response_delay_seconds, retrain_count_total
 
 # ── Model loading ──────────────────────────────────────────────────
 MODEL_DIR = Path(os.getenv("MODEL_PATH", "/app/model"))
@@ -65,6 +65,15 @@ async def lifespan(app: FastAPI):
         model_accuracy.set(float(acc_file.read_text().strip()))
     else:
         model_accuracy.set(0.0)
+
+    # Load actual retrain count instead of defaulting to 0
+    retrain_file = Path("/app/model/latest_retrain_count.txt")
+    if retrain_file.exists():
+        try:
+            count = float(retrain_file.read_text().strip())
+            retrain_count_total.inc(count)
+        except ValueError:
+            pass
     yield
 
 
@@ -129,6 +138,7 @@ def trigger_alerts():
     datalake_unavailable.inc()
     feature_added.inc()
     feature_removed.inc()
+    retrain_count_total.inc()
     for _ in range(20):
         response_delay_seconds.observe(2.0)
     return {"status": "alert conditions set"}

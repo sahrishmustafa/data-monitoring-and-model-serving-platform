@@ -74,6 +74,17 @@ def main():
     log.info(f"Retraining triggered. Reason: {args.reason}")
     retrain_count_total.inc()
 
+    # Read, increment and write retrain count to latest_retrain_count.txt
+    retrain_file = Path(__file__).parent / "latest_retrain_count.txt"
+    count = 0
+    if retrain_file.exists():
+        try:
+            count = int(retrain_file.read_text().strip())
+        except ValueError:
+            pass
+    count += 1
+    retrain_file.write_text(str(count))
+
     try:
         acc, model_path = run_training()
         model_accuracy.set(acc)

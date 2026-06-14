@@ -6,6 +6,10 @@ Endpoints:
   GET  /metrics  — Prometheus metrics
   GET  /health   — liveness check
 """
+from exporter.metrics import feature_removed
+from exporter.metrics import feature_added
+from exporter.metrics import datalake_unavailable
+from exporter.metrics import distribution_drift_detected
 import os
 import time
 import logging
@@ -54,13 +58,14 @@ app_state = {"model": None}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load model at startup."""
     app_state["model"] = load_latest_model()
-    log.info("Model loaded successfully")
-    # Set initial accuracy metric (will be updated after retraining)
-    model_accuracy.set(0.0)
+    # Load actual accuracy instead of defaulting to 0
+    acc_file = Path("/app/model/latest_accuracy.txt")
+    if acc_file.exists():
+        model_accuracy.set(float(acc_file.read_text().strip()))
+    else:
+        model_accuracy.set(0.0)
     yield
-    log.info("Shutting down")
 
 
 app = FastAPI(title="MLOps Inference API", lifespan=lifespan)
@@ -99,6 +104,8 @@ def predict(req: PredictRequest):
         prediction = model.predict(X)[0]
         probas = model.predict_proba(X)[0]
         confidence = float(np.max(probas))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
@@ -113,3 +120,15 @@ def metrics():
     """Expose Prometheus metrics in text format."""
     data = generate_latest()
     return Response(content=data, media_type=CONTENT_TYPE_LATEST)
+
+@app.post("/test/trigger-alerts")
+def trigger_alerts():
+    """Temporary endpoint to force alert conditions for testing."""
+    model_accuracy.set(0.5)
+    distribution_drift_detected.set(1)
+    datalake_unavailable.inc()
+    feature_added.inc()
+    feature_removed.inc()
+    for _ in range(20):
+        response_delay_seconds.observe(2.0)
+    return {"status": "alert conditions set"}

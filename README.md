@@ -323,6 +323,6 @@ mlops-project/
 
 ## Video Demo
 
-[Insert Google Drive / YouTube link here]
+[[Google Drive Link](https://drive.google.com/drive/folders/1Gyg4tzJ__S5BjLP8apCjNSjOHdLqql7m?usp=sharing)]
 
 The demo covers: live data ingestion, schema and drift monitoring, alert firing in Slack, Grafana dashboard with live data, and a passing GitHub Actions CI/CD run.

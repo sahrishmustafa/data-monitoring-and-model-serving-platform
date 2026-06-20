@@ -21,36 +21,7 @@ The system is designed to be self-healing: it detects data drift, schema changes
 
 ## System Architecture
 
-```
-Data API (port 6500)
-        │
-        ▼
-Ingestion Script (local)
-  ├── Schema monitoring
-  ├── Drift detection
-  └── Triggers retraining
-        │
-        ▼
-Model Training (scikit-learn Random Forest)
-  └── Saves versioned model_vN.pkl
-        │
-        ▼
-FastAPI Server (Docker on AWS EC2 — port 8000)
-  ├── POST /predict
-  ├── GET  /metrics
-  └── GET  /health
-        │
-        ▼
-Prometheus (local Docker Compose — scrapes EC2 every 15s)
-  ├── Evaluates 7 alert rules
-  └── Sends firing alerts to Alertmanager
-        │
-        ├──▶ Grafana (dashboards)
-        └──▶ Alertmanager ──▶ Slack (#mlops-alerts)
-
-GitHub Actions (on every push to main)
-  └── Lint → Test → Build Docker Image → Deploy to EC2
-```
+![System Architecture](mlops_system_flow.png)
 
 ---
 
